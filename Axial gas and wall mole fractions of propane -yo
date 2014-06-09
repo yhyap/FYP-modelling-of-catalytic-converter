@@ -1,0 +1,129 @@
+#Axial gas and wall mole fractions of propane
+
+import numpy as np
+import scipy
+import matplotlib.pylab
+import math
+
+#Basic Parameter
+Wi    = 1.1                         #mm               #Inside channel width(uncoated)
+Wt    = 0.15                        #mm               #Wall thickness between channels
+Aw    = 0.175                       #mm2              #Washcoat cross-sectional area
+Pw    = 3.8                         #mm               #Wetted perimeter of channel(with washcoat)
+Wl    = 170                         #kg/m3            #Washcoat loading
+Ds    = 2500                        #kg/m3            #Density of monolith substrate
+Vm    = 0.10                        #cm3/g            #Mesopore volume
+VM    = 0.18                        #cm3/g            #Macropore volume
+ug    = 1                           #m/s              #velocity of the gas approaching the monolith 
+P     = 101000                      #Pa               #Pressure
+Lc    = 46E-6                       #m                
+Sh    = 3.66                                          #Sherwood number 
+Dt    = 1E-3                        #m                
+zin   = 0	                    #m                #Inlet axial position (reactor length)		     
+zmax  = 51E-3                       #m                #Max axial position (reactor length)               
+zb    = np.arange(zin,zmax,1E-3)
+d     = len(zb)                                       #Number of discretization                   
+Tb    = 650                         #K                #Bulk inlet temperature
+dz    = 1E-3                        #m
+
+#Equation
+Ac    = Wi**2                       #mm2              #Flow area of a single channel(Unwashcoated channel)
+Af    = Ac -Aw                      #mm2              #Flow area of a single channel(Washcoated channel)
+L     = Wi + 2*(Wt/2)               #mm               #Length
+At    = L**2                        #mm2              #Total frontal area of the cell
+Pc    = Af/At                                         #Porosity (ratio of flow area to total area)
+ui    = ug/Pc                       #m/s              #Inlet channel velocity
+Aws   = At - Af                     #mm               #Cross-sectional area of the solid
+Dw    = Aws /Pw                     #mm               #Effective wall thickness           
+Dh    = 4*Af/Pw*10E-4               #m                #Hydraulic diameter
+
+#Basic Parameter (vmo - 0.5 m/s)
+Ts1     = 700	                    #K                #Surface temperature - vmo(0.5 m/s)
+vmo1    = 1.0                       #m/s              #Inlet channel velocity
+yb1     = np.zeros(d)                                 #Bulk concentration -Set array to zeros
+ys1     = np.zeros(d)                                 #Surface concentration -Set array to zeros
+yb1[0]  = 0.003                                       #Inlet mole fraction propane
+
+#Equations
+Db1    = 5.324E-5*Ts1**1.75/P                                            #m2/s   #Bulk diffusion coefficient  
+ks1    = math.exp(-1.08E4/Ts1)*2.4E5                                     #m/s    #Rate constant
+Dk1    = 9.213E-8*Ts1**0.5                                               #m2/s   #Knudsen diffusion coefficient
+Dv1    = (1/Db1 + 1/Dk1)**-1                                             #m2/s   #Diffusion coefficient in the pores
+Deff1  = 0.1*Dv1                                                         #m2/s   #Effective diffusivity
+phi1    = math.sqrt((Lc*ks1)/Deff1)                                              #Thiele modulus
+n1     = (1+(1.002/phi1**0.9794)**-1.307)**(-1/1.307)                            #Effectiveness factor
+Da1    = (n1*ks1*Dh)/(4*Db1)            
+kb1    = Sh*Db1/Dt                                                       #m/s    #Bulk rate constant 
+dh1    = -2.059E6+72.3*Ts1-9.69E-2*Ts1**2+4.34E-5*Ts1**3-7.56E-9*Ts1**4  #kJ/mol #Heat of reaction
+vm1     = (vmo1*Tb*101.3)/(298*101.3)                                    #m/s    #Actual channel velocity
+
+for i in range(0,d):      
+    ys1[i]     = yb1[i]/(1+n1*(ks1/kb1))
+
+    for j in range(0,d-1):
+        yb1[j+1] = yb1[j]-4*kb1*(yb1[j]-ys1[j])*dz/(Dh*vm1)
+
+#Basic Parameter (vmo - 1.0 m/s)
+Ts2     = 665	                    #K                #Surface temperature - vmo(1.0 m/s)
+vmo2    = 1.0                       #m/s              #Inlet channel velocity
+yb2     = np.zeros(d)                                 #Bulk concentration -Set array to zeros
+ys2     = np.zeros(d)                                 #Surface concentration -Set array to zeros
+yb2[0]  = 0.002                                       #Inlet mole fraction propane
+
+#Equations
+Db2    = 5.324E-5*Ts2**1.75/P                                            #m2/s   #Bulk diffusion coefficient  
+ks2    = math.exp(-1.08E4/Ts2)*2.4E5                                     #m/s    #Rate constant
+Dk2    = 9.213E-8*Ts2**0.5                                               #m2/s   #Knudsen diffusion coefficient
+Dv2    = (1/Db2 + 1/Dk2)**-1                                             #m2/s   #Diffusion coefficient in the pores
+Deff2  = 0.1*Dv2                                                         #m2/s   #Effective diffusivity
+phi2   = math.sqrt((Lc*ks2)/Deff2)                                              #Thiele modulus
+n2     = (1+(1.002/phi2**0.9794)**-1.307)**(-1/1.307)                            #Effectiveness factor
+Da2    = (n2*ks2*Dh)/(4*Db2)            
+kb2    = Sh*Db2/Dt                                                       #m/s    #Bulk rate constant 
+dh2    = -2.059E6+72.3*Ts2-9.69E-2*Ts2**2+4.34E-5*Ts2**3-7.56E-9*Ts2**4  #kJ/mol #Heat of reaction
+vm2     = (vmo2*Tb*101.3)/(298*101.3)                                    #m/s    #Actual channel velocity
+
+for i in range(0,d):      
+    ys2[i]     = yb2[i]/(1+n2*(ks2/kb2))
+
+    for j in range(0,d-1):
+        yb2[j+1] = yb2[j]-4*kb2*(yb2[j]-ys2[j])*dz/(Dh*vm2)
+
+#Basic Parameter (vmo - 2.0 m/s)
+Ts3     = 650	                    #K                  #Surface temperature - vmo(2.0 m/s)
+vmo3    = 1.0                       #m/s              #Inlet channel velocity
+yb3     = np.zeros(d)                                 #Bulk concentration -Set array to zeros
+ys3     = np.zeros(d)                                 #Surface concentration -Set array to zeros
+yb3[0]  = 0.001                                       #Inlet mole fraction propane
+
+#Equations
+Db3    = 5.324E-5*Ts3**1.75/P                                            #m2/s   #Bulk diffusion coefficient  
+ks3    = math.exp(-1.08E4/Ts3)*2.4E5                                     #m/s    #Rate constant
+Dk3    = 9.213E-8*Ts3**0.5                                               #m2/s   #Knudsen diffusion coefficient
+Dv3    = (1/Db3 + 1/Dk3)**-1                                             #m2/s   #Diffusion coefficient in the pores
+Deff3  = 0.1*Dv3                                                         #m2/s   #Effective diffusivity
+phi3   = math.sqrt((Lc*ks3)/Deff3)                                               #Thiele modulus
+n3     = (1+(1.002/phi3**0.9794)**-1.307)**(-1/1.307)                            #Effectiveness factor
+Da3    = (n3*ks3*Dh)/(4*Db3)            
+kb3    = Sh*Db3/Dt                                                       #m/s    #Bulk rate constant 
+dh3    = -2.059E6+72.3*Ts3-9.69E-2*Ts3**2+4.34E-5*Ts3**3-7.56E-9*Ts3**4  #kJ/mol #Heat of reaction
+vm3     = (vmo3*Tb*101.3)/(298*101.3)                                    #m/s    #Actual channel velocity
+
+for i in range(0,d):      
+    ys3[i]     = yb3[i]/(1+n3*(ks3/kb3))
+
+    for j in range(0,d-1):
+        yb3[j+1] = yb3[j]-4*kb3*(yb3[j]-ys3[j])*dz/(Dh*vm3)
+
+
+matplotlib.pylab.plot(zb,yb1,label='yo = 0.003 ')
+matplotlib.pylab.plot(zb,yb2,label='yo = 0.002')
+matplotlib.pylab.plot(zb,yb3,label='yo = 0.001')
+matplotlib.pylab.plot(zb,ys1,'--')
+matplotlib.pylab.plot(zb,ys2,'--')
+matplotlib.pylab.plot(zb,ys3,'--')
+matplotlib.pylab.title('Axial gas and wall mole fractions of propane')
+matplotlib.pylab.grid()
+matplotlib.pylab.xlabel('Axial position,m')
+matplotlib.pylab.ylabel('Mole fraction propane')
+matplotlib.pylab.show()
