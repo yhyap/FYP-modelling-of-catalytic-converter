@@ -129,12 +129,11 @@ for a in range (0,d):
     Mm1[a]     = yb1[a]*44.1+(1-yb1[a])*28.97                                               #g/mol   #Mass of mixture
     rho1[a]   = (P*Mm1[a])/(Rg*1000*Tb1[a])                                                 #kg/m3   #Density of mixture
     c1[a]     =  P/(Rg*Tb1[a])                                                              #mol/m3  #Concentration of mixture
-    ys1[a]    = yb1[a]/(1+n1[a]*(ks1[a]/kb1[a]))                                                     #Surface concentration
-    kw1[a]    = 0.9558-2.09E-4*Ts1[a]
-     
+    ys1[a]    = yb1[a]/(1+n1[a]*(ks1[a]/kb1[a]))
+
     for j in range(0,d-1):
         Tb1[j+1] = Tb1[j]+(4*h1[j]*(Ts1[j]-Tb1[j])*dz)/(Dh*rho1[j]*Cp1[j]*vm1[j])           #K       #Bulk temperature
-        Ts1[j+1] = h1[j]*(Ts1[j]-Tb1[j])+n1[j]*dh1[j]*ks1[j]*c1[j]*ys1[j]/h1[j]                          #K       #Surface temperature
+        Ts1[j+1] = Tb1[j+1]-n1[j]*dh1[j]*ks1[j]*c1[j]*ys1[j]/h1[j]                            #K       #Surface temperature
         yb1[j+1] = yb1[j]-4*kb1[j]*(yb1[j]-ys1[j])*dz/(Dh*vm1[j])                                    #Bulk mole fraction
 
 #Basic Parameter (vmo - 1 m/s)
