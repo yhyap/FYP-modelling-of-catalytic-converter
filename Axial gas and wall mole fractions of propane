@@ -90,7 +90,7 @@ for i in range(0,d):
         yb2[j+1] = yb2[j]-4*kb2*(yb2[j]-ys2[j])*dz/(Dh*vm2)
 
 #Basic Parameter (vmo - 2.0 m/s)
-Ts3     = 670	                    #K                  #Surface temperature - vmo(2.0 m/s)
+Ts3     = 670	                    #K                #Surface temperature - vmo(2.0 m/s)
 vmo3    = 2.0                       #m/s              #Inlet channel velocity
 yb3     = np.zeros(d)                                 #Bulk concentration -Set array to zeros
 ys3     = np.zeros(d)                                 #Surface concentration -Set array to zeros
