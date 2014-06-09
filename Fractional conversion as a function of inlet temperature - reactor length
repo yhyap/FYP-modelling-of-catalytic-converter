@@ -1,0 +1,120 @@
+#Fractional conversion as a function of inlet temperature
+
+import numpy as np
+import scipy
+import matplotlib.pylab
+import math
+
+#Basic Parameter
+Wi     = 1.1                         #mm               #Inside channel width(uncoated)
+Wt     = 0.15                        #mm               #Wall thickness between channels
+Aw     = 0.175                       #mm2              #Washcoat cross-sectional area
+Pw     = 3.8                         #mm               #Wetted perimeter of channel(with washcoat)
+Wl     = 170                         #kg/m3            #Washcoat loading
+Ds     = 2500                        #kg/m3            #Density of monolith substrate
+Vm     = 0.10                        #cm3/g            #Mesopore volume
+VM     = 0.18                        #cm3/g            #Macropore volume
+ug     = 1                           #m/s              #velocity of the gas approaching the monolith 
+P      = 101000                      #Pa               #Pressure
+Lc     = 46E-6                       #m                
+Sh     = 3.66                                          #Sherwood number 
+Nu     = 3.66                                          #Nusselt number
+Dt     = 1E-3                        #m                
+Tin    = 500			     #K                #Inlet temperature 
+Tmax   = 810                         #K                #Maximum temperature
+Tb     = np.arange(Tin,Tmax,10)
+d      = len(Tb)                                       #Number of discretization                   
+dz     = 1E-3                        #m
+Rg     = 8.314                       #J/molK           #Ideal gas constant
+Ts     = 620	                     #K                #Surface temperature - vmo(0.5 m/s)
+vmo    = 1                           #m/s              #Inlet channel velocity
+
+#Set array to zeros
+vm      = np.zeros(d)
+
+ys1     = np.zeros(d)
+yb1     = np.zeros(d)
+z1      = np.zeros(d)
+
+ys2     = np.zeros(d)
+yb2     = np.zeros(d)
+z2      = np.zeros(d)
+
+ys3     = np.zeros(d)
+yb3     = np.zeros(d)
+z3      = np.zeros(d)
+
+#Equations
+Ac    = Wi**2                                                          #mm2              #Flow area of a single channel(Unwashcoated channel)
+Af    = Ac -Aw                                                         #mm2              #Flow area of a single channel(Washcoated channel)
+L     = Wi + 2*(Wt/2)                                                  #mm               #Length
+At    = L**2                                                           #mm2              #Total frontal area of the cell
+Pc    = Af/At                                                                            #Porosity (ratio of flow area to total area)
+ui    = ug/Pc                                                          #m/s              #Inlet channel velocity
+Aws   = At - Af                                                        #mm               #Cross-sectional area of the solid
+Dw    = Aws /Pw                                                        #mm               #Effective wall thickness           
+Dh    = 4*Af/Pw*10E-4                                                  #m                #Hydraulic diameter
+Db    = 5.324E-5*Ts**1.75/P                                            #m2/s             #Bulk diffusion coefficient  
+ks    = math.exp(-1.08E4/Ts)*2.4E5                                     #m/s              #Rate constant
+Dk    = 9.213E-8*Ts**0.5                                               #m2/s             #Knudsen diffusion coefficient
+Dv    = (1/Db + 1/Dk)**-1                                              #m2/s             #Diffusion coefficient in the pores
+Deff  = 0.1*Dv                                                         #m2/s             #Effective diffusivity
+phi   = math.sqrt((Lc*ks)/Deff)                                                          #Thiele modulus
+n     = (1+(1.002/phi**0.9794)**-1.307)**(-1/1.307)                                      #Effectiveness factor
+Da    = (n*ks*Dh)/(4*Db)            
+kb    = Sh*Db/Dt                                                       #m/s              #Bulk rate constant 
+dh    = -2.059E6+72.3*Ts-9.69E-2*Ts**2+4.34E-5*Ts**3-7.56E-9*Ts**4     #kJ/mol           #Heat of reaction
+
+for i in range (0,d):
+    vm[i]    = (vmo*Tb[i]*101.3)/(298*101.3)                           #m/s     #Actual channel velocity  
+
+#Basic Parameter (L = 100mm)
+yb1[0]  = 0.002                       #Inlet mole fraction propane
+zin1    = 0	      #m              #Inlet mole fraction 
+zmax1   = 100E-3      #m              #Maximum mole fraction
+dz1     = np.linspace(zin1,zmax1,d)
+
+#Equations
+for a in range(0,d):
+    ys1[a]    = yb1[a]/(1+n*(ks/kb))                                              #Surface concentration
+    z1[a]     = (yb1[0]-yb1[a])/yb1[0]                                            #Fractional conversion 
+    
+    for j in range(0,d-1):
+        yb1[j+1] = yb1[j]-4*n*ks*ys1[j]*dz1[j]/(Dh*vm[j])                         #Bulk mole fraction
+
+#Basic Parameter (L = 50 mm)
+yb2[0]  = 0.002                       #Inlet mole fraction propane
+zin2    = 0	      #m              #Inlet mole fraction 
+zmax2   = 50E-3       #m              #Maximum mole fraction
+dz2     = np.linspace(zin2,zmax2,d)
+
+#Equations
+for a in range(0,d):
+    ys2[a]    = yb2[a]/(1+n*(ks/kb))                                              #Surface concentration
+    z2[a]     = (yb2[0]-yb2[a])/yb2[0]                                            #Fractional conversion 
+    
+    for j in range(0,d-1):
+        yb2[j+1] = yb2[j]-4*n*ks*ys2[j]*dz2[j]/(Dh*vm[j])                         #Bulk mole fraction
+
+#Basic Parameter (L = 25mm)
+yb3[0]  = 0.002                       #Inlet mole fraction propane
+zin3    = 0	      #m              #Inlet mole fraction 
+zmax3   = 25E-3       #m              #Maximum mole fraction
+dz3     = np.linspace(zin3,zmax3,d)
+
+#Equations
+for a in range(0,d):
+    ys3[a]    = yb3[a]/(1+n*(ks/kb))                                              #Surface concentration
+    z3[a]     = (yb3[0]-yb3[a])/yb3[0]                                            #Fractional conversion 
+    
+    for j in range(0,d-1):
+        yb3[j+1] = yb3[j]-4*n*ks*ys3[j]*dz3[j]/(Dh*vm[j])                         #Bulk mole fraction
+
+matplotlib.pylab.plot(Tb,z1,label='L - 100mm')
+matplotlib.pylab.plot(Tb,z2,label='L - 50mm')
+matplotlib.pylab.plot(Tb,z3,label='L - 25mm')
+matplotlib.pylab.title('Fractional conversion as a function of inlet temperature')
+matplotlib.pylab.grid()
+matplotlib.pylab.xlabel('Inlet gas temperature,K')
+matplotlib.pylab.ylabel('Fractional conversion')
+matplotlib.pylab.show()
