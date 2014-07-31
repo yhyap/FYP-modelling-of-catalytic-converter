@@ -243,6 +243,7 @@ for jjj in range (0,nu):
             Y = np.insert(Y7,len(Y7),Tku1)
 
 
+# Change of temperature with time at the inlet
 for t in range(0,nout+1):
     rt1=200.0                # linear ramp time in second
     rt2=500.0                # linear ramp time in second
@@ -282,6 +283,8 @@ for t in range(0,nout+1):
     else:
         Tkee[t]=Tke
 
+
+# Parameters in the gas phase
 for i in range(0,nz):   
     v[i] = vmean*Tk[i]/298
     Dca[i] = (1.013E-2*Tk[i]**(1.75)*(1/Mco+1/Mair)**(0.5))/(P*(Vco**(0.3333)+Vair**(0.3333))**2)
@@ -312,7 +315,8 @@ for i in range(0,nz):
     kmc[i] = Sh[i]*Dcc[i]/DH
     hm[i] = Nu[i]*k_a[i]/DH
 
-            
+
+# Parameters in the solid phase
 for jj in range (0,ns):
     for i in range(0,nz):
         YCO[i,jj] = Yas [i,jj]
@@ -396,7 +400,7 @@ def pde(t,y):
 
         
 
-            
+    # Gas phase        
     for i in range(0,nz):
         if (i ==0):
             Yazz[i] = (Ya[i+1]-2.0*Ya[i]+Yae)/dzs
@@ -433,10 +437,11 @@ def pde(t,y):
             Ycz[i]  = (Yc[i]-Yc[i-1])/dz
             Tkz[i]  = (Tk[i]-Tk[i-1])/dz
 
-
+    
     for jj in range (0,ns):
         for i in range(0,nz):
-
+            
+            # Washcoat phase in radial direction
             if (jj == 0):   
                 Yass[i,jj]= 1/por*(4.0*Deas[i,jj]*(Yas[i,jj+1]-Yas[i,jj])/dss+kma[i]*(Ya[i]-Yas[i,jj])/ds)
                 Ybss[i,jj]= 1/por*(4.0*Debs[i,jj]*(Ybs[i,jj+1]-Ybs[i,jj])/dss+kmb[i]*(Yb[i]-Ybs[i,jj])/ds)
@@ -456,6 +461,7 @@ def pde(t,y):
                 Ycss[i,jj]=0
                 Tkss[i,jj]=0
 
+            # Cordierite phase in radial direction
             if jj ==0 :
                 Yasss[i,jj]=0
                 Ybsss[i,jj]=0
