@@ -243,47 +243,6 @@ for jjj in range (0,nu):
             Y = np.insert(Y7,len(Y7),Tku1)
 
 
-# Change of temperature with time at the inlet
-for t in range(0,nout+1):
-    rt1=200.0                # linear ramp time in second
-    rt2=500.0                # linear ramp time in second
-    rt3=300.0                # 300 s of constant temperature
-    rt4=100.0                # linear ramp time in second
-    rt5=200.0                # linear ramp time in second
-    rt6=500.0                # linear ramp time in second
-    Tkef1=505.0              # temperature point 1
-    Tkef2=543.0              # temperature point 2, max
-    Tkef4=485.0              # temperature point 3
-    Tkef5=445.0              # temperature point 4
-    mp1=(Tkef1-Tke)/rt1    # multiplier 1
-    mp2=(Tkef2-Tkef1)/rt2  # multiplier 2
-    # mp3 is flat therefore no equation
-    mp4=(Tkef4-Tkef2)/rt4  # multiplier 4
-    mp5=(Tkef5-Tkef4)/rt5  # multiplier 5
-    mp6=(Tke-Tkef5)/rt6    # multiplier 6
-    
-    if t<rt1:             
-        Tkee[t]=Tke+mp1*t
-        
-    elif t<(rt1+rt2):      
-        Tkee[t]=Tkef1+mp2*(t-rt1)
-        
-    elif t<(rt1+rt2+rt3):       
-        Tkee[t]=Tkef2
-        
-    elif t<(rt1+rt2+rt3+rt4):                
-        Tkee[t]=Tkef2+mp4*(t-(rt1+rt2+rt3))
-        
-    elif t<(rt1+rt2+rt3+rt4+rt5):
-        Tkee[t]=Tkef4+mp5*(t-(rt1+rt2+rt3+rt4))
-        
-    elif t<(rt1+rt2+rt3+rt4+rt5+rt6):
-        Tkee[t]=Tkef5+mp6*(t-(rt1+rt2+rt3+rt4+rt5))
-        
-    else:
-        Tkee[t]=Tke
-
-
 # Parameters in the gas phase
 for i in range(0,nz):   
     v[i] = vmean*Tk[i]/298
@@ -396,10 +355,46 @@ def pde(t,y):
     Ybszz = np.zeros((nz,ns))
     Ycszz = np.zeros((nz,ns))
     Tkszz = np.zeros((nz,ns))
-
-
+    
+    #Temperature profile
+    rt1=200.0                # linear ramp time in second
+    rt2=500.0                # linear ramp time in second
+    rt3=300.0                # 300 s of constant temperature
+    rt4=100.0                # linear ramp time in second
+    rt5=200.0                # linear ramp time in second
+    rt6=500.0                # linear ramp time in second
+    Tkef1=505.0              # temperature point 1
+    Tkef2=543.0              # temperature point 2, max
+    Tkef4=485.0              # temperature point 3
+    Tkef5=445.0              # temperature point 4
+    mp1=(Tkef1-Tke)/rt1    # multiplier 1
+    mp2=(Tkef2-Tkef1)/rt2  # multiplier 2
+    # mp3 is flat therefore no equation
+    mp4=(Tkef4-Tkef2)/rt4  # multiplier 4
+    mp5=(Tkef5-Tkef4)/rt5  # multiplier 5
+    mp6=(Tke-Tkef5)/rt6    # multiplier 6
+    
+    if f.t<rt1:             
+        Tkee=Tke+mp1*f.t
         
-
+    elif f.t<(rt1+rt2):      
+        Tkee=Tkef1+mp2*(f.t-rt1)
+        
+    elif f.t<(rt1+rt2+rt3):       
+        Tkee=Tkef2
+        
+    elif f.t<(rt1+rt2+rt3+rt4):                
+        Tkee=Tkef2+mp4*(f.t-(rt1+rt2+rt3))
+        
+    elif f.t<(rt1+rt2+rt3+rt4+rt5):
+        Tkee=Tkef4+mp5*(f.t-(rt1+rt2+rt3+rt4))
+        
+    elif f.t<(rt1+rt2+rt3+rt4+rt5+rt6):
+        Tkee=Tkef5+mp6*(f.t-(rt1+rt2+rt3+rt4+rt5))
+        
+    else:
+        Tkee=Tke
+        
     # Gas phase        
     for i in range(0,nz):
         if (i ==0):
@@ -711,7 +706,7 @@ while f.successful() and f.t < tf:
 
     print f.t
     t+= 1
-    f.set_initial_value(Y7,f.t+td)
+    f.set_initial_value(Y7,f.t)
 
 rCO = np.zeros(nout)
 r2CO = np.zeros(nout)
