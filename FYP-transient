@@ -544,7 +544,7 @@ def pde(t,y):
 
 #independent variable
 
-f = scipy.integrate.ode(pde).set_integrator('vode',method = 'bdf', order =15,atol = 1E-14, rtol = 1E-14)
+f = scipy.integrate.ode(pde).set_integrator('vode',method = 'bdf', order =15,atol = 1E-5, rtol = 1E-5)
 f.set_initial_value(Y7,0)
 time = np.zeros(n_steps)
 a = []
