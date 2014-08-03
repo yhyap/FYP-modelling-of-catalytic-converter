@@ -237,7 +237,7 @@ for jj in range (0,ns):
         
 for jjj in range (0,nu):
     for i in range(0,nz):
-            Tku [i,jjj] = Tk0
+            Tku[i,jjj] = Tk0
             
             Tku1 = Tku.ravel()
             Y = np.insert(Y7,len(Y7),Tku1)
